@@ -1,0 +1,33 @@
+#!/bin/bash
+
+[ ./init-externals.sh ] || exit 1
+
+mkdir -p ./build
+
+log_file="./build/build.log"
+echo "
+*********************************************************
+* BUILD LOG STARTED $(date)
+*********************************************************
+" >> "${log_file}"
+
+
+
+build_package() {
+	local path="$1"
+	local output="$2"
+	local descr="$3"
+	shift 3	
+
+	echo "Building $output from $path ($descr)" | tee -a "${log_file}"
+	./externals/makeself/makeself.sh "$path" "$output" "$descr" $@ >> "${log_file}" 2>&1
+	local res=$?
+	if [[ $res != "0" ]]; then
+		echo "Failed to build $output ($descr)" | tee -a "${log_file}"
+	else
+		echo "Done. $output is ready." | tee -a "${log_file}"
+	fi
+}
+
+
+build_package setup-uboot ./build/setup-uboot "AC100 u-boot installer" ./init.sh uboot
