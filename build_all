@@ -1,6 +1,8 @@
 #!/bin/bash
 
-[ ./init-externals.sh ] || exit 1
+if [ ! -e ./externals/makeself/makeself.sh ]; then
+	./init-externals.sh || exit 1
+fi
 
 mkdir -p ./build
 
