@@ -54,8 +54,18 @@ do
     if [ "$skip" == "1" ]; then continue; fi
     start=$(( ${PT[11]}*$BPS/512-$secpart_size ))
     size=$(( ${PT[13]}*$BPS/512 ))
-    echo "${name}=${start}:${size}"
     end=$(( $start + $size - 1 ))
+
+    if [[ $i == "1" ]]; then
+        # Fake partition for u-boot script
+        boot_start="33"
+        boot_end="$(($start - 1))"
+        boot_size="$(($boot_end - ${boot_start}))"
+        echo "BOOT=${boot_start}:${boot_size}"
+        i=$(( $i + 1 ))
+    fi
+    echo "${name}=${start}:${size}"
+
     i=$(( $i + 1 ))
 	#echo "$i: ${name} [${start}, ${end}] (size ${size})" >&2
 done <<< "$pt"
