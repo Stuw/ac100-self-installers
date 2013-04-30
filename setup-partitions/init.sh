@@ -20,6 +20,11 @@ main()
 
 	for rec in $cfg
 	do
+		if [[ "x#" == "x${rec:0:1}" ]]; then
+			echo "Skip $rec"
+			continue
+		fi
+
 		name="${rec%=*}"
 		size="${rec#*=}"
 		if [ $size == "-1" ]; then
