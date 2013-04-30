@@ -21,19 +21,28 @@ main()
 	for rec in $cfg
 	do
 		if [[ "x#" == "x${rec:0:1}" ]]; then
-			echo "Skip $rec"
 			continue
 		fi
 
 		name="${rec%=*}"
-		size="${rec#*=}"
+		start_size="${rec#*=}"
+
+		if [[ "$start_size" == *":"* ]]; then
+			start="${start_size%:*}"
+			size="${start_size#*:}"
+		else
+			start=$first_free
+			size="${start_size}"
+		fi
+
 		if [ $size == "-1" ]; then
 			size=$(( $disk_size - $GPT_HDR - $first_free ))
 		fi
 	
-		start=$first_free
 		end=$(( $start + $size ))
 		first_free=$(( $end + 1 ))
+
+		#echo "$name [$start:$end]"
 
 		part_cmd="
 mkpart primary $start $end
