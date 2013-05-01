@@ -24,10 +24,9 @@ echo "trying to find NV PT ..." >&2
 for dev in $SCANDEVS; do
     test -e $dev || continue
     pt=`dd if=$dev bs=2k count=1 skip=512 status=none| od -j$SKIP_HEADER -w$ENTRY_SIZE -N$PT_SIZE -tuz`
-	#pt=`dd if=$dev bs=2k count=1 | od -j$SKIP_HEADER -w$ENTRY_SIZE -N$PT_SIZE -tuz`
+    #pt=`dd if=$dev bs=2k count=1 | od -j$SKIP_HEADER -w$ENTRY_SIZE -N$PT_SIZE -tuz`
     echo "checking $dev" >&2
-    read -a PT <<< "$pt"
-    name=`echo "${PT[21]}" | sed -e "s/^>\.*\(\w\+\).*/\1/g"`
+    name=`echo "$pt" | head -n1 | awk '{print $22}' | sed -e "s/^>\.*\(\w\+\).*/\1/g"`
     if [ "x$name" == "xBCT" ]; then break; fi
 done
 
@@ -44,29 +43,27 @@ echo "#Generated_by_script_from_device_'${dev}'"
 
 i=1
 
-while read -a PT
+while true
 do
-    name=`echo "${PT[21]}" | sed -e "s/^>\.*\(\w\+\).*/\1/g"`
+    rec=`echo "$pt" | head -n$i | tail -n1`
+    name=`echo "$rec" | awk '{print $22}' | sed -e "s/^>\.*\(\w\+\).*/\1/g"`
+    if [[ -z $name ]]; then
+    	break
+    fi
+    
+    i=$(( $i + 1 ))
+    
     skip=0
     for ign in $IGNORE; do
         if [ "$ign" == "$name" -o "x" == "x$name" ]; then skip=1; fi
     done
     if [ "$skip" == "1" ]; then continue; fi
-    start=$(( ${PT[11]}*$BPS/512-$secpart_size ))
-    size=$(( ${PT[13]}*$BPS/512 ))
+    
+    start=$(( `echo "$rec" | awk '{print $12}'` * $BPS / 512 - $secpart_size ))
+    size=$(( `echo "$rec" | awk '{print $14}'` * $BPS / 512 ))
     end=$(( $start + $size - 1 ))
 
-    if [[ $i == "1" ]]; then
-        # Fake partition for u-boot script
-        boot_start="33"
-        boot_end="$(($start - 1))"
-        boot_size="$(($boot_end - ${boot_start}))"
-        echo "BOOT=${boot_start}:${boot_size}"
-        i=$(( $i + 1 ))
-    fi
     echo "${name}=${start}:${size}"
-
-    i=$(( $i + 1 ))
-	#echo "$i: ${name} [${start}, ${end}] (size ${size})" >&2
-done <<< "$pt"
+    #echo "$i: ${name} [${start}, ${end}] (size ${size})" >&2
+done
 
