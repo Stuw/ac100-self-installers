@@ -80,24 +80,29 @@ error()
 	exit 1
 }
 
-main()
-{
-	echo "Searching partition table..."
-	sh ./dump_part_table.sh > current.cfg || error Failed to dump current partition table
 
-	echo "Dumping boot partitions..."
-	#sh ./boot_partitions.sh --dump || error Failed to dump boot partitions
-	
+echo "Searching partition table..."
+sh ./dump_part_table.sh > current.cfg || error Failed to dump current partition table
+
+device=$(head -n1 current.cfg | sed 's/#Generated_by_script_from_device_//g')
+echo "Boot device: $device"
+
+echo "Dumping boot partitions..."
+sh ./boot_partitions.sh --dump $device || error Failed to dump boot partitions
+
+if [ "x$1" == "x--force" ]; then
 	echo "Installing u-boot..."
-	#sh ./install_bootloader.sh uboot.bin || error Failed to install u-boot
+	sh ./install_bootloader.sh uboot.bin || error Failed to install u-boot
 
 	echo "Switching to GPT..."	
-	#apply_partitions_config current.cfg || error Failed to switch to GPT
+	apply_partitions_config current.cfg || error Failed to switch to GPT
 
 	echo "Configuring u-boot..."
-	#sh ./boot_partitions.sh --apply || error Failed to configure u-boot
-	
-	echo "Done."
-}
+	sh ./boot_partitions.sh --apply $device || error Failed to configure u-boot
 
-main
+	echo "Done."
+else
+    echo "To install uboot and gpt use --force"
+    exit 0
+fi
+

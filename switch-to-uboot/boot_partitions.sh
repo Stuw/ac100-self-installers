@@ -18,23 +18,23 @@ dump_partition()
 dump_boot_partitions()
 {
     device="$1"
-    dump_partition sos "${device}p1" || (echo sos fail; rm -rf sos)
-    dump_partition lnx "${device}p2" || (echo lnx fail; rm -rf lnx)
+    dump_partition sos "${device}p1" || (echo No boot image in SOS partition; rm -rf sos)
+    dump_partition lnx "${device}p2" || (echo No boot image in LNX partition; rm -rf lnx; exit 1)
 }
 
 
 configure_uboot()
 {
-    device="$1"
+    device="${1}p1"
  
-    echo "mkimage ... -d initrd.img initrd-uboot"
+    mkimage -n MyRamDisk -A arm -O linux -T ramdisk -C gzip -d lnx/initrd.img lnx/initrd-uboot
     
     mkfs.ext2 -F "$device" >/dev/null || exit 1
     mkdir lnx/mnt
-    #mount "$device" lnx/mnt || exit 1
+    mount "$device" lnx/mnt || exit 1
     mkdir lnx/mnt/boot || (umount lnx/mnt; exit 1)
     cp lnx/zImage lnx/mnt/boot/zImage || (umount lnx/mnt; exit 1)
-    cp lnx/initrd.img lnx/mnt/boot/initrd-uboot || (umount lnx/mnt; exit 1)
+    cp lnx/initrd-uboot lnx/mnt/boot/initrd-uboot || (umount lnx/mnt; exit 1)
     
     cmdline=$(cat lnx/bootimg.cfg | grep cmdline | sed "s/cmdline = //")
 
@@ -46,14 +46,15 @@ ext2load mmc 0 0x1000000 /boot/zImage
 ext2load mmc 0 0x2200000 /boot/initrd-uboot
 bootz 0x1000000 0x2200000" > $cfg
 
-    echo "mkimage ... -d boot.cmd boot.scr"
+    mkimage -A arm -O linux -T script -C none -a 0 -e 0 -n "myscript" -d "$cfg" lnx/mnt/boot/boot.scr
 
     umount lnx/mnt
 }
 
 
 case $1 in
-	"--dump") dump_boot_partitions /dev/mmcblk1 ;;
-	"--apply") configure_uboot mmcblkY ;;
-	*) dump_boot_partitions ../mmcblkX ;;
+	"--dump") dump_boot_partitions $2 ;;
+	"--apply") configure_uboot $2 ;;
+	*) echo "Usage: $0 <--dump device|--apply device>" ;;
 esac
+
