@@ -23,7 +23,7 @@ echo "trying to find NV PT ..." >&2
 
 for dev in $SCANDEVS; do
     test -e $dev || continue
-    pt=`dd if=$dev bs=2k count=1 skip=512 status=none| od -j$SKIP_HEADER -w$ENTRY_SIZE -N$PT_SIZE -tuz`
+    pt=`dd if=$dev bs=2k count=1 skip=512 | od -j$SKIP_HEADER -w$ENTRY_SIZE -N$PT_SIZE -tuz`
     #pt=`dd if=$dev bs=2k count=1 | od -j$SKIP_HEADER -w$ENTRY_SIZE -N$PT_SIZE -tuz`
     echo "checking $dev" >&2
     #echo "$pt" | awk '{print $2}'
