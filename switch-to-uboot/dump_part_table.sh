@@ -6,7 +6,7 @@
 # Please report bugs on freenode #ac100
 
 IGNORE="BCT PT EBT MBR EM1 EM2"
-SCANDEVS="mmcblk*"
+SCANDEVS="/dev/mmcblk*"
 SKIP_HEADER=72
 ENTRY_SIZE=$((20*4))
 MAX_ENTRIES=13
