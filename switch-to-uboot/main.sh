@@ -4,6 +4,7 @@
 apply_partitions_config()
 {
 	config_file="$1"
+	device="$2"
 	
 	cfg=$(cat $config_file)
 	if [ -z "$cfg" ]; then
@@ -56,7 +57,6 @@ name $i $name"
 print
 quit"
 	
-	device="/dev/mmcblk0"
 	disk_size="$(blockdev --getsize ${device})"
 	#device="image-8G.bin"
 	#disk_size=$(( $(stat -c%s ${device}) / 512 ))
@@ -92,10 +92,10 @@ sh ./boot_partitions.sh --dump $device || error Failed to dump boot partitions
 
 if [ "x$1" == "x--force" ]; then
 	echo "Installing u-boot..."
-	sh ./install_bootloader.sh uboot.bin || error Failed to install u-boot
+	sh ./install_bootloader.sh uboot.bin $device || error Failed to install u-boot
 
 	echo "Switching to GPT..."	
-	apply_partitions_config current.cfg || error Failed to switch to GPT
+	apply_partitions_config current.cfg $device || error Failed to switch to GPT
 
 	echo "Configuring u-boot..."
 	sh ./boot_partitions.sh --apply $device || error Failed to configure u-boot

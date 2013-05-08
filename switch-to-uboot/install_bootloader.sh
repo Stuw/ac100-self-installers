@@ -4,8 +4,8 @@
 install_bootloader()
 {
 	bootloader="$1"
-	
-	device="mmcblk0"
+	device="$2"
+
 	bct="ac100.bct"
 	new_bct="new.bct"
 	bct_config="bct.cfg"
@@ -43,5 +43,5 @@ install_bootloader()
 }
 
 
-install_bootloader "$1"
+install_bootloader "$1" "$2"
 
