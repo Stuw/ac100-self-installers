@@ -28,7 +28,8 @@ apply_partitions_config()
 		name="${rec%=*}"
 		start_size="${rec#*=}"
 
-		if [[ "$start_size" == *":"* ]]; then
+		echo $start_size | grep ":" > /dev/null
+		if [[ $? == "0" ]]; then
 			start="${start_size%:*}"
 			size="${start_size#*:}"
 		else
