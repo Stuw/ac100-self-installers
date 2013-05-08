@@ -12,7 +12,8 @@ install_bootloader()
 
 	bct_dev="${device}boot0"
 	echo "Dump configuration..."
-	bct_dump "$bct_dev" > "$bct_config"
+	dd if="$bct_dev" of="$bct" bs=4080 count=1 || (echo "Failed to copy bct to file"; exit 1)
+	bct_dump "$bct" > "$bct_config"
 	if [ $? -ne "0" ]; then
 		echo "Failed to dump BCT config."
 		return 1
