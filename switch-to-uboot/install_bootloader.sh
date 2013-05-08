@@ -19,7 +19,7 @@ install_bootloader()
 		return 1
 	fi
 
-	echo 'BootLoader = ${bootloader},0x00108000,0x00108000,Complete;' >> $bct_config
+	echo "BootLoader = ${bootloader},0x00108000,0x00108000,Complete;" >> $bct_config
 
 	echo 0 > "/sys/block/$(basename ${device})boot0/force_ro"
 	echo 0 > "/sys/block/$(basename ${device})boot1/force_ro"
