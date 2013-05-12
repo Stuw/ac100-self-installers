@@ -4,21 +4,22 @@
 install_bootloader()
 {
 	bootloader="$1"
-	
-	device="mmcblk0"
+	device="$2"
+
 	bct="ac100.bct"
 	new_bct="new.bct"
 	bct_config="bct.cfg"
 
 	bct_dev="${device}boot0"
 	echo "Dump configuration..."
-	bct_dump "$bct_dev" > "$bct_config"
+	dd if="$bct_dev" of="$bct" bs=4080 count=1 || (echo "Failed to copy bct to file"; exit 1)
+	bct_dump "$bct" > "$bct_config"
 	if [ $? -ne "0" ]; then
 		echo "Failed to dump BCT config."
 		return 1
 	fi
 
-	echo 'BootLoader = ${bootloader},0x00108000,0x00108000,Complete;' >> $bct_config
+	echo "BootLoader = ${bootloader},0x00108000,0x00108000,Complete;" >> $bct_config
 
 	echo 0 > "/sys/block/$(basename ${device})boot0/force_ro"
 	echo 0 > "/sys/block/$(basename ${device})boot1/force_ro"
@@ -43,5 +44,5 @@ install_bootloader()
 }
 
 
-install_bootloader "$1"
+install_bootloader "$1" "$2"
 

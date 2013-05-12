@@ -41,7 +41,7 @@ echo "found NV PT on $dev" >&2
 
 dev=${dev:0:12}
 
-echo "#Generated_by_script_from_device_'${dev}'"
+echo "#Generated_by_script_from_device_${dev}"
 
 i=1
 
