@@ -39,7 +39,7 @@ apply_partitions_config()
 			size=$(( $disk_size - $GPT_HDR - $first_free ))
 		fi
 	
-		end=$(( $start + $size ))
+		end=$(( $start + $size - 1 ))
 		first_free=$(( $end + 1 ))
 
 		#echo "$name [$start:$end]"
