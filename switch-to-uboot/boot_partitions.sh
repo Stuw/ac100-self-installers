@@ -70,8 +70,8 @@ configure_uboot()
     echo "echo === boot.scr: loading from SOS partition ===
 mmc dev 0
 setenv bootargs '$cmdline'
-ext2load mmc 0:1 0x1000000 /boot/zImage
-ext2load mmc 0:1 0x2200000 /boot/initrd-uboot
+ext2load mmc 0:2 0x1000000 /boot/zImage
+ext2load mmc 0:2 0x2200000 /boot/initrd-uboot
 bootz 0x1000000 0x2200000" > $cfg
 
     mkimage -A arm -O linux -T script -C none -a 0 -e 0 -n "myscript" -d "$cfg" ${mnt_point}/sos/boot/boot.scr
