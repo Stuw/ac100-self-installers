@@ -30,8 +30,8 @@ install_bootloader()
 		return 1
 	fi
 
-	dd if=/dev/zero of==${device}boot0 2>/dev/null
-	dd if=/dev/zero of==${device}boot1 2>/dev/null
+	dd if=/dev/zero of=${device}boot0 2>/dev/null
+	dd if=/dev/zero of=${device}boot1 2>/dev/null
 
 	dd if=${new_bct} of=${bct_dev}
 	if [ $? -ne "0" ]; then
