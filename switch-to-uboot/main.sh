@@ -82,13 +82,12 @@ error()
 }
 
 
-echo "Searching partition table..."
-sh ./dump_part_table.sh > current.cfg || error Failed to dump current partition table
+echo "Analyzing NV partition table..."
+sh ./dump_part_table.sh current.cfg || error Failed to dump current partition table
 
 device=$(head -n1 current.cfg | sed 's/#Generated_by_script_from_device_//g')
 echo "Boot device: $device"
 
-echo "Dumping boot partitions..."
 sh ./boot_partitions.sh --dump $device || error Failed to dump boot partitions
 
 read -p "Continue (y/n) ? "
