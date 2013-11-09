@@ -4,10 +4,22 @@ dump_partition()
 {
     name="$1"
     dev="$2"
+    desc="$3"
+    
     res=0
     
     rm -rf "$name"
     mkdir "$name"
+    
+    img_name="$(abootimg -i "$dev" 2>/dev/null | grep "Boot Name")"
+    res=$?
+    if [ $res != 0 ]; then
+    	echo "$desc: <no image>"
+    	return $res;
+    fi
+    img_name="$(echo $img_name | awk -F= '{print $2}' | sed 's/^[ ]*//;s/"//g')"
+    echo "$desc: $img_name"
+    
     cd "$name"
     abootimg -x "$dev" > /dev/null 2>&1 || res=1
     cd ..
@@ -18,8 +30,11 @@ dump_partition()
 dump_boot_partitions()
 {
     device="$1"
-    dump_partition sos "${device}p1" || (echo No boot image in SOS partition; rm -rf sos)
-    dump_partition lnx "${device}p2" || (echo No boot image in LNX partition; rm -rf lnx; exit 1)
+    dump_partition sos "${device}p1" "SOS partition" || rm -rf sos
+    dump_partition lnx "${device}p2" "LNX partition" || rm -rf lnx
+    if [ ! -d lnx ]; then
+    	exit 1
+    fi
 }
 
 _mount()
