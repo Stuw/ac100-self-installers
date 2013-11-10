@@ -12,6 +12,8 @@ apply_partitions_config()
 		return 1
 	fi
 
+	format_cmd=""
+
 	repart_cmd="unit s
 	mklabel gpt"
 	
@@ -25,8 +27,17 @@ apply_partitions_config()
 			continue
 		fi
 
-		name="${rec%=*}"
+		name_fs="${rec%=*}"
 		start_size="${rec#*=}"
+
+		echo $name_fs | grep ":" > /dev/null
+		if [[ $? == "0" ]]; then
+			name="${name_fs%:*}"
+			fs="${name_fs#*:}"
+		else
+			name="${name_fs}"
+			fs=""
+		fi
 
 		echo $start_size | grep ":" > /dev/null
 		if [[ $? == "0" ]]; then
@@ -44,7 +55,18 @@ apply_partitions_config()
 		end=$(( $start + $size - 1 ))
 		first_free=$(( $end + 1 ))
 
-		#echo "$name [$start:$end]"
+		echo "$name [$start:$end] (fs: $fs)"
+		
+		case "$fs" in
+			"ext2")
+				format_cmd="$format_cmd mkfs.$fs ${device}p$i ;" ;;
+			"ext3")
+				format_cmd="$format_cmd mkfs.$fs ${device}p$i ;" ;;
+			"ext4")
+				format_cmd="$format_cmd mkfs.$fs ${device}p$i ;" ;;
+			*)
+			;;
+		esac
 
 		part_cmd="
 mkpart primary $start $end
@@ -75,7 +97,17 @@ quit"
 $repart_cmd
 EOF
 	
-}
+	if [[ $? != "0" ]]; then
+		echo "Repartition failed"
+		exit 1
+	fi
 
+	if [ -z $format_cmd ]; then
+		echo "NO format"
+	else
+		echo "$format_cmd"
+		eval $format_cmd
+	fi	
+}
 
 apply_partitions_config "$1" "$2"
