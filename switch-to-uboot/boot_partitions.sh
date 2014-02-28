@@ -32,9 +32,11 @@ dump_boot_partitions()
     device="$1"
     dump_partition sos "${device}p1" "SOS partition" || rm -rf sos
     dump_partition lnx "${device}p2" "LNX partition" || rm -rf lnx
-    if [ ! -d lnx ]; then
+    if [ ! -d lnx ] && [ ! -d sos ]; then
     	exit 1
     fi
+
+	exit 0
 }
 
 _mount()

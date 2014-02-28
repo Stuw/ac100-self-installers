@@ -9,26 +9,37 @@ config_out="$1"
 
 
 IGNORE="BCT PT EBT MBR EM1 EM2"
-SCANDEVS="/dev/mmcblk*"
+if [ -z "$SCANDEVS" ]; then
+	SCANDEVS="/dev/mmcblk*"
+	BOOTDEVS="/dev/mmcblk?boot0"
+fi
 SKIP_HEADER=72
 ENTRY_SIZE=$((20*4))
 MAX_ENTRIES=13
 PT_SIZE=$(($MAX_ENTRIES*$ENTRY_SIZE))
 BPS=2048
+if [ -z "$PT_OFFSET" ]; then
+	PT_OFFSET=512
+fi
 IFS=" "
 
 # find the size of the two secure partitions (ac100 only?)
-secpart_size=$(/sbin/blockdev --getsz /dev/mmcblk?boot0)
+secpart_size=$(/sbin/blockdev --getsz $BOOTDEVS 2>/dev/null || echo 0)
 secpart_size=$(( $secpart_size*2 ))
 #secpart_size=$(( 2 * 1024 * 1024 / 512 ))
 
 for dev in $SCANDEVS; do
     test -e $dev || continue
-    pt=`dd if=$dev bs=2k count=1 skip=512 2>/dev/null | od -j$SKIP_HEADER -w$ENTRY_SIZE -N$PT_SIZE -tuz`
-    #pt=`dd if=$dev bs=2k count=1 2>/dev/null | od -j$SKIP_HEADER -w$ENTRY_SIZE -N$PT_SIZE -tuz`
-    #echo "Checking $dev ..."
-    #echo "$pt" | awk '{print $2}'
+    pt=`dd if=$dev bs=2k count=1 skip="$PT_OFFSET" 2>/dev/null | od -j$SKIP_HEADER -w$ENTRY_SIZE -N$PT_SIZE -tuz`
+	#pt=`dd if=$dev bs=2k count=1 2>/dev/null | od -j$SKIP_HEADER -w$ENTRY_SIZE -N$PT_SIZE -tuz`
+	if [ -n "$VERBOSE_ON" ]; then
+	    echo "Checking $dev ..."
+    	echo "$pt" # | awk '{print $2}'
+	fi
     name=`echo "$pt" | head -n1 | awk '{print $22}' | sed -e "s/^>\.*\(\w\+\).*/\1/g"`
+	if [ -n "$VERBOSE_ON" ]; then
+		echo "$name"
+	fi
     #name=`echo "${PT[21]}" | sed -e "s/^>\.*\(\w\+\).*/\1/g"`
     if [ "x$name" == "xBCT" ]; then break; fi
 done
