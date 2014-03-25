@@ -1,5 +1,6 @@
 #!/bin/sh
 
+PARTED_LOG="/tmp/parted.log"
 
 apply_partitions_config()
 {
@@ -89,25 +90,28 @@ quit"
 		return 1
 	fi
 	
-	echo $repart_cmd
+	echo $repart_cmd >>"$PARTED_LOG" 2>&1
 	
-	parted $device rm 1 rm 2 rm 3 rm 4 rm 5 rm 6 rm 7 rm 8 rm 9 >/dev/null 2>&1
+	parted $device rm 1 rm 2 rm 3 rm 4 rm 5 rm 6 rm 7 rm 8 rm 9 >>"$PARTED_LOG" 2>&1
 
-	parted $device << EOF
+	parted $device >>"$PARTED_LOG" 2>&1 << EOF
 $repart_cmd
 EOF
 	
 	if [[ $? != "0" ]]; then
-		echo "Repartition failed"
+		echo "Repartition failed. For more information see $PARTED_LOG"
 		exit 1
 	fi
 
 	if [ -z $format_cmd ]; then
-		echo "NO format"
+		echo "Without formatting." >>"$PARTED_LOG" 2>&1
 	else
-		echo "$format_cmd"
-		eval $format_cmd
-	fi	
+		echo "$format_cmd" >>"$PARTED_LOG" 2>&1
+		eval $format_cmd >>"$PARTED_LOG" 2>&1
+		# TODO Check for errors
+	fi
+
+	parted $device unit s print
 }
 
 apply_partitions_config "$1" "$2"
