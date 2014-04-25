@@ -51,6 +51,9 @@ fi
 
 echo "Installing u-boot..."
 sh ./install_bootloader.sh uboot.bin $device || error Failed to install u-boot
+# Workaround: erase old PT partition
+dd if=/dev/zero of=$device bs=512 count=7168 > /dev/null 2>&1
+
 
 if [ x"$KEEP_PT" == "xy" ]; then
 	echo "Switching to GPT (keep old partitions)..."	

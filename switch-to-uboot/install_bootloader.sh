@@ -33,9 +33,6 @@ install_bootloader()
 	dd if=/dev/zero of=${device}boot0 2>/dev/null
 	dd if=/dev/zero of=${device}boot1 2>/dev/null
 
-	# Workaround: erase old PT partition
-	dd if=/dev/zero of=${device} bs=512 count=7168
-
 	dd if=${new_bct} of=${bct_dev}
 	if [ $? -ne "0" ]; then
 		echo "Failed to write new BCT."
