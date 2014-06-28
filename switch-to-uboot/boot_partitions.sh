@@ -18,7 +18,7 @@ dump_partition()
     	return $res;
     fi
     img_name="$(echo $img_name | awk -F= '{print $2}' | sed 's/^[ ]*//;s/"//g')"
-    echo "$desc: $img_name"
+    echo "$desc: '$img_name'"
     
     cd "$name"
     abootimg -x "$dev" > /dev/null 2>&1 || res=1
