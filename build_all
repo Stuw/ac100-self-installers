@@ -33,3 +33,4 @@ build_package() {
 
 
 build_package switch-to-uboot ./build/switch-to-uboot "AC100 uboot+gpt installer" ./main.sh
+build_package partitioner ./build/partitioner "AC100 uboot Android + Linux partitioner" ./main.sh
