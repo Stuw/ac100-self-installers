@@ -9,6 +9,8 @@ error()
 
 CONFIG_FILE="current.cfg"
 
+clear
+
 echo "Analyzing NV partition table..."
 sh ./dump_part_table.sh "$CONFIG_FILE" || error Failed to dump current partition table
 
