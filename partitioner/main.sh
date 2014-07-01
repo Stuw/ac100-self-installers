@@ -24,7 +24,7 @@ for dev in /dev/mmcblk* ; do
 	device=${dev:5}
 	test -e "/sys/class/block/${device}/device/type" || continue
 	type="$(cat "/sys/class/block/${device}/device/type" 2>/dev/null)"
-	name="$(cat "/sys/class/block/${device}/device/type" 2>/dev/null)"
+	name="$(cat "/sys/class/block/${device}/device/name" 2>/dev/null)"
 	if [ "x$type" == "xMMC" ]; then
 		device=$dev;
 		break;
