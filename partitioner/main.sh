@@ -6,13 +6,27 @@ error() {
 	exit 1
 }
 
-gpt_warning() {
-	echo "GPT partition scheme already exists."
-	read -p "Do you want to destroy it and create new one? (y/n) ? " DESTROY_PS
+check_gpt() {
+	PS="$(parted "$1" unit s print | grep "Partition Table" | awk -F ": " '{print $2}')"
+	if [ "x$PS" == "xGPT" ]; then
+		return 0
+	fi
+
+	return 1
+}
+
+show_no_gpt_warning() {
+	echo "GPT partition scheme not found. Probably u-boot is not installed"
+	echo "on this machine as a bootloader. To use GPT partition scheme you"
+	echo "need to install u-boot first."
+	echo "To install u-boot say n and run ./switch-to-uboot"
+	echo " "
+	read -p "Do you want to use GPT anyway? (y/n) ? " DESTROY_PS
 	if [ x"$DESTROY_PS" != "xy" ]; then
 		return 1
 	fi
 
+	echo " "
 	return 0
 }
 
@@ -33,6 +47,8 @@ done
 
 
 test -e "$device" || error "Device not found."
+
+check_gpt "$device" || show_no_gpt_warning || exit 1
 
 echo "$device ($type) [$name] will be repartitioned using GPT."
 echo "What operating system(s) will you use ?"
