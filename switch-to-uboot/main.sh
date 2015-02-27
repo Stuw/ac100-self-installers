@@ -28,16 +28,16 @@ USE_BOOT_PARTITIONS="n"
 echo "Analyzing NV partition table..."
 sh ./dump_part_table.sh "$CONFIG_FILE"
 if [ $? -ne 0 ]; then
+	device="$(detect_target)"
+	[ -z "$dev" ] && error "Target device was not detected"
+	echo "Boot device: $device"
+
 	echo -e "\nFailed to dump current partition table. It is damaged or absent."
 	echo -e "\nIf you want to install u-boot anyway say 'y'."
 	read -p "Continue (y/n) ? " CONTINUE_WO_PT
 	if [ x"$CONTINUE_WO_PT" != "xy" ]; then
 		exit
 	fi
-
-	dev="$(detect_target)"
-	[ -z "$dev" ] && error "Target device was not detected"
-	echo "Boot device: $device"
 else
 	device=$(head -n1 "$CONFIG_FILE" | sed 's/#Generated_by_script_from_device_//g')
 	echo "Boot device: $device"
