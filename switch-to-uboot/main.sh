@@ -29,7 +29,7 @@ echo "Analyzing NV partition table..."
 sh ./dump_part_table.sh "$CONFIG_FILE"
 if [ $? -ne 0 ]; then
 	device="$(detect_target)"
-	[ -z "$dev" ] && error "Target device was not detected"
+	[ -z "$device" ] && error "Target device was not detected"
 	echo "Boot device: $device"
 
 	echo -e "\nFailed to dump current partition table. It is damaged or absent."
