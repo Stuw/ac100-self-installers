@@ -9,23 +9,6 @@ error()
 	exit 1
 }
 
-# 1 - dev
-erase_partitions() {
-	local dev="$1"
-	local cmd="unit s"
-	
-	for p in $(parted -s "$dev" print | awk '/^ / {print $1}')
-	do
-		cmd="$cmd
-rm $p"
-	done
-	
-	parted $dev >>"$PARTED_LOG" 2>&1 << EOF
-$cmd
-quit
-EOF
-}
-
 
 # 1 - config file
 # 2 - device
@@ -115,8 +98,6 @@ apply_partitions_config()
 	fi
 	
 	echo $repart_cmd >>"$PARTED_LOG" 2>&1
-	
-	erase_partitions "$device" || error "Can't remove old partitions"
 	
 	echo "Repartitioning..." | tee -a "$PARTED_LOG"
 
