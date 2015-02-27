@@ -41,8 +41,7 @@ apply_partitions_config()
 	
 	local format_cmd=""
 
-	local repart_cmd="unit s
-	mklabel gpt"
+	local repart_cmd="sgdisk --zap-all $device"
 	
 	local GPT_HDR=34
 	local first_free=$GPT_HDR
@@ -95,18 +94,15 @@ apply_partitions_config()
 			;;
 		esac
 
-		part_cmd="
-mkpart primary $start $end
-name $i $name"
-	
-		repart_cmd="${repart_cmd}${part_cmd}"
+		part_cmd="sgdisk -n ${1}:${start}:${end} -c ${1}:${name} $device"
+
+		repart_cmd="${repart_cmd} && ${part_cmd}"
+
 		i=$(( $i + 1 ))
 	done < "$config_file"
 
+	# Append tail command
 	format_cmd="${format_cmd} true"	
-	repart_cmd="${repart_cmd}
-print
-quit"
 	
 	disk_size="$(blockdev --getsize ${device})"
 	[ -z "$disk_size" ] && error "Can't detect disk size"
@@ -124,10 +120,7 @@ quit"
 	
 	echo "Repartitioning..." | tee -a "$PARTED_LOG"
 
-	parted $device >>"$PARTED_LOG" 2>&1 << EOF
-$repart_cmd
-EOF
-	
+	eval "$repart_cmd" >>"$PARTED_LOG" 2>&1
 	if [[ $? != "0" ]]; then
 		error "Repartition failed."
 	fi
@@ -149,7 +142,7 @@ EOF
 		echo -e "Result: $err (res: $res)\n" >>"$PARTED_LOG" 2>&1
 	fi
 
-	parted $device unit s print >>"$PARTED_LOG" 2>&1
+	sgdisk -p $device >>"$PARTED_LOG" 2>&1
 	
 	return $res
 }
