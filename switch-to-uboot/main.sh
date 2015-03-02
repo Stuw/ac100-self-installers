@@ -94,11 +94,8 @@ if [ x"$KEEP_PT" == "xy" ]; then
 	fi
 else
 	echo "Switching to GPT (remove all partitions)..."	
-	parted $device << EOF
-unit s
-mklabel gpt
-quit
-EOF
+	sgdisk --zap-all "$device"
+	sgdisk -og "$device"
 fi
 
 echo "Done."
