@@ -97,6 +97,7 @@ else
 	parted $device << EOF
 unit s
 mklabel gpt
+quit
 EOF
 fi
 
