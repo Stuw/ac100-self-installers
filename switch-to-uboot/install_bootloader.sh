@@ -23,7 +23,7 @@ Bctcopy       = 1;
 Bctfile       = ${bct};
 BootLoader = ${bootloader},0x00108000,0x00108000,Complete;" >> $bct_config
 
-	cbootimage --debug "$bct_config" "${new_bct}"
+	cbootimage --debug -o0x800c0075 "$bct_config" "${new_bct}"
 	if [ $? -ne "0" ]; then
 		echo "Failed to gen new BCT."
 		return 1
